@@ -1,4 +1,4 @@
-Dieses Repository enthält die LÖsungen für den Kurs "Coding For Law Students"
+Dieses Repository enthält die Lösungen für den Kurs "Coding For Law Students"
 
 Enthaltene Übungsprojekte:
 
