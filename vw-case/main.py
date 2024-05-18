@@ -3,58 +3,81 @@
 #
 #
 
-### Füge hier die richtigen Imports ein
+### Hier importieren wir die benötigten Bibliotheken
+import Brief as Brief
+import datetime
 
 
-### Füge hier dein bot token ein und definiere deinen Bot
-
-bot_api_key = 
-bot = telegram.Bot(token = bot_api_key)
-
-### Liste deine States auf mit = range(n)
+### Hier definieren wir unsere globalen Variablem, also Variablen, die für den gesamten Programmablauf zur Verfügung stehen sollen
 
 
+texts = {
+    "marke": "Welche Automarke haben Sie gekauft? Geben Sie VW, Audi, Seat, Skoda, BMW oder Mercedes an.",
+    "motor": "Welchen Motortyp haben Sie? Geben sie EA189 oder EA288 an.",
+    "kauf-datum": "Wann haben Sie das Auto gekauft?",
+    "kauf-ort": "Wo haben sie das Auto gekauft?",
+    "kauf-preis": "Wie viel haben Sie gezahlt?",
+    "kilometer-kauf": "Wie war der anfängliche Kilometerstand bei Kauf des Autos?",
+    "kilometer-aktuell": "Wie ist der aktuelle Tachostand des Autos?",
+    "name": "Bitte geben Sie Ihren vollständigen Namen ein:",
+    "anschrift": "Bitte geben Sie Ihre vollständige Anschrift an"
+}
 
-### definiere hier deine globalen Variablen
+aktenzeichen = "1"
+answers = {}
 
+### Mit dieser Funktion können wir die Fragen an unsere User stellen
+def get_user_input(question):
+    answer = input(question)
+    return answer
 
-
-### Definiere hier die Antwortmöglichkeiten für deine ReplyMarkups via Listen
-
-
-
-### Schreibe hier die Funktionen für die einzelnen Fragen
-
-
-
-def cancel (update, context):
-    update.message.reply_text("Der Vorgang wurde abgebrochen.")
-    return ConversationHandler.END
-
-
-### Hier definierst du deinen Conversation Handler
+### Hier definieren wir unsere Logik
 def main():
-    updater = Updater(token=bot_api_key, use_context=True)
 
-    dp = updater.dispatcher
+    answers["marke"] = get_user_input(texts["marke"])
 
-    vwcase =  ConversationHandler(
-        entry_points=[# gib hier deinen Entry Point/ Commands an ],
-
-        states={
-            #ordne hier deine states funktionen zu
-        },
-            
-        per_user= True,
-
-        fallbacks=[CommandHandler('cancel', cancel)]
-    )
-
-    dp.add_handler(vwcase)
+    if answers["marke"] not in ("VW","Audi","Seat","Skoda","BMW","Mercedes"):
+        print("Ungültige Eingabe. Programm wird abgebrochen.")
+        return ## damit brechen wir die Funktion ab
+    elif answers["marke"] in ("BMW","Mercedes"):
+        print("Diese Marken sind nicht betroffen. Programm wird abgebrochen.")
+        return
     
-    updater.start_polling()
+    answers["motor"] = get_user_input(texts["motor"])
 
-### Diese Funktion brauchst du, damit dein Bot gestartet wird, da wir außerhalb von Jupyter arbeiten
+    if answers["motor"] not in ("EA189","EA288"):
+        print("Ungültige Eingabe. Programm wird abgebrochen.")
+        return
+    
+    answers["kauf-datum"] = get_user_input(texts["kauf-datum"])
 
+    purchase_date = datetime.datetime.strptime(answers["kauf-datum"]) 
+
+    if answers["motor"] == "EA189" and purchase_date < datetime.datetime.strptime("01.01.2012"):
+        print("Ihr Anliegen ist leider bereits verjährt.")
+        return
+    if answers["motor"] == "EA189" and purchase_date > datetime.datetime.strptime("22.09.2015"):
+        print("Ihr Motor ist nicht betroffen.")
+        return
+    if answers["motor"] == "EA288" and purchase_date < datetime.datetime.strptime("01.01.2012"):
+        print("Ihr Anliegen ist leider bereits verjährt.")
+        return
+    if answers["motor"] == "EA288" and purchase_date > datetime.datetime.strptime("12.09.2019"):
+        print("Ihr Motor ist nicht betroffen.")
+        return
+
+    answers["kauf-ort"] = get_user_input(texts["kauf-ort"])
+    answers["kauf-ort"] = int(get_user_input(texts["kauf-preis"]))
+    answers["kilometer-kauf"] = int(get_user_input(texts["kilometer-kauf"]))
+    answers["kilometer-aktuell"] = int(get_user_input(texts["kilometer-aktuell"]))
+    answers["name"] = get_user_input(texts["name"])
+    answers["anschrift"] = get_user_input(texts["anschrift"])
+
+    Brief.generiere_schreiben(answers, aktenzeichen)
+
+    aktenzeichen = str(int(aktenzeichen)+1)
+
+
+### Dieser Aufruf führt dazu, dass diie Funktion "main" bei Ausführen des Python Programms ausgeführt wird
 if __name__ == '__main__':
     main()

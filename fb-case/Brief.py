@@ -4,7 +4,7 @@
 
 import pdfkit, datetime
 
-def generiere_schreiben(antwort_dict):
+def generiere_schreiben(antwort_dict, aktenzeichen):
         ### Hier wird der Briefkopf definiert
         html = """
                 <p style = "float:right;">
@@ -24,9 +24,9 @@ def generiere_schreiben(antwort_dict):
         html += """
                 <p style = "float:right;">
                 Frankfurt, den """
-        html += ### füge hier das aktuelle Datum ein
+        html += datetime.datetime.today()
         html += "<br/>Aktenzeichen 22/"
-        html += ### füge hier das Aktenzeichen ein
+        html += aktenzeichen
         html += " </p><br/><br/><br/><br/>"
 
         # Beginn Inhalt Schreiben
@@ -36,9 +36,9 @@ def generiere_schreiben(antwort_dict):
                 <p>Sehr geehrte Damen und Herren,</p>
                 <p>in der vorgenannten Angelegenheit zeige ich mit beiliegender Vollmacht an, dass mich 
                 """  
-        html += ### füge hier den Namen ein
+        html += antwort_dict["name"]
         html += ", "
-        html += ### füge hier die Anschrift ein
+        html += antwort_dict["anschrift"]
         html += "mit der Wahrnehmung seiner/ihrer Interessen beauftragt hat.</p>"
 
         html += """
@@ -70,5 +70,5 @@ def generiere_schreiben(antwort_dict):
                 Scherzanwalt
                 """
 
-        pdfkit.from_string(html,('Anschreiben_','.pdf')) ### füge das Aktenzeichen mit in den Dateinamen ein
+        pdfkit.from_string(html,('Anschreiben_'+aktenzeichen.zfill(6)+'.pdf')) 
 

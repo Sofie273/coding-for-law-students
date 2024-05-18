@@ -3,58 +3,74 @@
 #
 #
 
-### Füge hier die richtigen Imports ein
+### Hier importieren wir die benötigten Bibliotheken
+import Brief as Brief
+import datetime
+import pandas as pd
 
 
+### Hier definieren wir unsere globalen Variablem, also Variablen, die für den gesamten Programmablauf zur Verfügung stehen sollen
+texts = {
+    "account": "Haben Sie einen Facebook-Account?",
+    "mobil": "Bitte geben Sie ihre Telefonnummer ein:",
+    "name": "Bitte geben Sie Ihren vollständigen Namen an.",
+    "email_vorhanden": ["Wir haben zu Ihrem Facebook Account folgende E- Mailadresse gefunden:","Dürfen wir Sie auf der gleichen E-Mail Adresse kontaktieren?"],
+    "email_nicht_vorhanden": "Wir haben zu Ihrem Facebook Account keine E- Mailadresse gefunden.",
+    "email_input": "Bitte geben Sie Ihre E-Mail Adresse ein, über die wir sie kontaktieren dürfen:",
+    "anschrift": "Bitte geben Sie Ihre vollständige Anschrift an:"
+}
 
-### Füge hier dein bot token ein und definiere deinen Bot
+daten = pd.read_csv("export.csv")
+
+answers = {}
+
+### Mit dieser Funktion können wir die Fragen an unsere User stellen
+def get_user_input(question):
+    answer = input(question)
+    return answer
+
+def find_mobile_number(mobile):
+    return mobile in daten.Mobil.values
+
+def find_email(mobile):
+    return daten[daten.Mobil == mobile]["EMail"].values
 
 
-
-### Liste deine States auf mit = range(n)
-
-
-
-### Definiere hier deine globalen Variablen
-
-
-
-### Definiere hier die Antwortmöglichkeiten für deine ReplyMarkups via Listen
-
-
-
-### Schreibe hier die Funktionen für die einzelnen Fragen
-
-
-def cancel (update, context):
-    update.message.reply_text("Der Vorgang wurde abgebrochen.")
-    return ConversationHandler.END
-
-
-### Hier definierst du deinen Conversation Handler
-
+### Hier definieren wir unsere Logik
 def main():
-    updater = Updater(token=bot_api_key, use_context=True)
 
-    dp = updater.dispatcher
+    answers["account"] = get_user_input(texts["account"])
 
-    facebook =  ConversationHandler(
-         entry_points=[# gib hier deinen Entry Point/ Commands an ],
+    if answers == "nein":
+        print("Sie sind ziemlich sicher nicht vom Datenleck betroffen.")
+        return
 
-        states={
-            #ordne hier deine states funktionen zu
-        },
-            
-        per_user= True,
+    answers["mobil"] = get_user_input(texts["mobil"])
 
-        fallbacks=[CommandHandler('cancel', cancel)]
-    )
-
-    dp.add_handler(facebook)
+    if find_mobile_number(answers["mobil"]) == False:   
+        print("Die Mobilnummer wurde nicht im Datensatz gefunden.\nVermutlich sind Sie nicht vom Datenleck betroffen.")
+        return
     
-    updater.start_polling()
+    answers["name"] = get_user_input(texts["name"])
 
-### Diese Funktion brauchst du, damit dein Bot gestartet wird, da wir außerhalb von Jupyter arbeiten
+    email = find_email(answers["mobil"])
 
+    if email != None:
+        answers["mail_vorhanden"] = get_user_input(texts["email_vorhanden"][0]+email+texts["email_vorhanden"][1])
+
+        if answers["mail_vorhanden"] == "nein":
+            answers["email"] = get_user_input(texts["email_input"])
+        else:
+            answers["email"] = email
+    else:
+        print(texts["email_nicht_vorhanden"])
+        answers["email"] = get_user_input(texts["email_input"])
+
+    answers["anschrift"] = get_user_input(texts["anschrift"])
+
+    Brief.generiere_schreiben(answers, answers["mobil"][-5:])
+    
+
+### Dieser Aufruf führt dazu, dass diie Funktion "main" bei Ausführen des Python Programms ausgeführt wird
 if __name__ == '__main__':
     main()
