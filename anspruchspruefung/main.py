@@ -43,7 +43,7 @@ def main():
     
     answers["verschulden"] = get_user_input(texte.verschulden["3.1"])
 
-    if answers["verschulden"] == "nein":
+    if answers["verschulden"] == "ja":
         print(texte.abbruch["8.1"])
         return
     
